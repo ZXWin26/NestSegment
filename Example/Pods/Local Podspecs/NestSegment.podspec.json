@@ -1,0 +1,22 @@
+{
+  "name": "NestSegment",
+  "version": "0.1.0",
+  "summary": "A short description of NestSegment.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Paul.Yin/NestSegment",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Paul.Yin": "Paul.Yin@yff.com"
+  },
+  "source": {
+    "git": "https://github.com/Paul.Yin/NestSegment.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "9.0"
+  },
+  "source_files": "NestSegment/Classes/**/*"
+}
