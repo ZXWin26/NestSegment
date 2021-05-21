@@ -1,0 +1,6 @@
+framework module NestSegment {
+  umbrella header "NestSegment-umbrella.h"
+
+  export *
+  module * { export * }
+}

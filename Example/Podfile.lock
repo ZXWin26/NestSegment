@@ -1,0 +1,23 @@
+PODS:
+  - NestSegment (0.1.0):
+    - SnapKit
+  - SnapKit (4.2.0)
+
+DEPENDENCIES:
+  - NestSegment (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - SnapKit
+
+EXTERNAL SOURCES:
+  NestSegment:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  NestSegment: fe07f85b4843d204cc170292a1871fc8f4ef8230
+  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+
+PODFILE CHECKSUM: eebfc313225aa623e76ae3b3d117c03737f3ebe5
+
+COCOAPODS: 1.10.1
