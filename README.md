@@ -2,8 +2,9 @@
 
 [![CI Status](https://img.shields.io/travis/Paul.Yin/NestSegment.svg?style=flat)](https://travis-ci.org/Paul.Yin/NestSegment)
 [![Version](https://img.shields.io/cocoapods/v/NestSegment.svg?style=flat)](https://cocoapods.org/pods/NestSegment)
-[![License](https://img.shields.io/cocoapods/l/NestSegment.svg?style=flat)](https://cocoapods.org/pods/NestSegment)
+[![License](https://img.shields.io/github/license/ZXWin26/NestSegment)](https://github.com/ZXWin26/NestSegment/blob/main/LICENSE)
 [![Platform](https://img.shields.io/cocoapods/p/NestSegment.svg?style=flat)](https://cocoapods.org/pods/NestSegment)
+[![language](https://img.shields.io/badge/language-swift-orange.svg)](https://cocoapods.org/pods/NestSegment)
 
 ## Example
 
