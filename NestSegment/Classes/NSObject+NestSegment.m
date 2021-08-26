@@ -1,6 +1,6 @@
 //
 //  NSObject+NestSegment.m
-//  YFUIKit
+//  NestSegment
 //
 //  Created by paul.yin on 2021/4/1.
 //

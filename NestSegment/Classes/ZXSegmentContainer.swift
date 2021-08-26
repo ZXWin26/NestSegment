@@ -1,26 +1,15 @@
 //
 //  ZXSegmentContainer.swift
-//  ReOrientWM
+//  NestSegment
 //
-//  Created by zagger on 09/08/2017.
-//  Copyright © 2017 RuiFuTech. All rights reserved.
+//  Created by paul.yin on 2021/4/24.
 //
 
 import UIKit
 
-public protocol ZXSegmentContentItem: class {
+public protocol ZXSegmentContentItem: AnyObject {
     var itemView: UIView { get }
     var itemViewController: UIViewController? { get }
-}
-
-extension UIView: ZXSegmentContentItem {
-    public var itemView: UIView {
-        return self
-    }
-    
-    public var itemViewController: UIViewController? {
-        return nil
-    }
 }
 
 extension UIViewController: ZXSegmentContentItem {
@@ -33,7 +22,7 @@ extension UIViewController: ZXSegmentContentItem {
     }
 }
 
-public protocol ZXSegmentContainerDataSource: class {
+public protocol ZXSegmentContainerDataSource: AnyObject {
     func numberOfItems(_ container: ZXSegmentContainer) -> Int
     func container(_ container: ZXSegmentContainer, topBarItemFor index: Int) -> ZXSegmentBarItem
     /** 提供每项显示的内容，仅支持UIView和UIViewController两种类型，每次reload该方法对每个index只会调用一次 */
@@ -52,7 +41,7 @@ extension ZXSegmentContainerDelegate {
     public func container(_ container: ZXSegmentContainer, didSelectItemAt index: Int, type: ZXSegmentContainer.SwitchType) {}
 }
 
-public protocol YFScrollToTopProtocol: class {
+public protocol YFScrollToTopProtocol: AnyObject {
     /** 在包含scrollView的UIView或UIViewController中，设置scrollView的scrollToTop特性 */
     func setScrollToTop(_ scrollToTop: Bool)
 }
@@ -270,6 +259,8 @@ extension ZXSegmentContainer {
         
         if let scrollViewItem = contentItemCache[index] as? YFScrollToTopProtocol {
             scrollViewItem.setScrollToTop(true)
+        } else {
+            layoutIfNeeded()
         }
         
         if let preIndex = fromIndex {

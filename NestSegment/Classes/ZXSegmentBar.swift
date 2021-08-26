@@ -1,15 +1,14 @@
 //
-//  YFSegmentBar.swift
-//  ReOrientWM
+//  ZXSegmentBar.swift
+//  NestSegment
 //
-//  Created by zagger on 07/08/2017.
-//  Copyright © 2017 RuiFuTech. All rights reserved.
+//  Created by paul.yin on 2021/4/24.
 //
 
 import UIKit
 import SnapKit
 
-public protocol ZXSegmentBarDelegate: class {
+public protocol ZXSegmentBarDelegate: AnyObject {
     func numberOfItems(_ bar: ZXSegmentBar) -> Int
     func segmentBar(_ bar: ZXSegmentBar, itemForIndex index: Int) -> ZXSegmentBarItem
     func segmentBar(_ bar: ZXSegmentBar, didClickItemAtIndex index: Int)
@@ -21,7 +20,7 @@ extension ZXSegmentBarDelegate {
     func segmentBar(_ bar: ZXSegmentBar, didClickItemAtIndex index: Int) {}
 }
 
-public protocol ZXSegmentBarItem: class {
+public protocol ZXSegmentBarItem: AnyObject {
     var view: UIView { get }
     var idx: Int { get set }
     var isSelected: Bool { get set }

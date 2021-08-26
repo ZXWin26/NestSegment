@@ -54,7 +54,7 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func setupSubview() {
+    func setupSubview() {
         addSubview(headerView)
         addSubview(container)
         addSubview(contentHeightView)
@@ -74,22 +74,7 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
         }
     }
     
-    open override var contentOffset: CGPoint {
-        didSet {
-            let headerHeight = headerView.bounds.height
-            let sublistOffsetY = contentOffset.y - headerHeight
-            
-            if sublistOffsetY >= 0 {
-                currentContentVC?.scrollView.contentOffset.y = sublistOffsetY
-                barTopConstraint?.update(offset: sublistOffsetY)
-            } else {
-                barTopConstraint?.update(offset: 0)
-                sublistScrollToTop()
-            }
-        }
-    }
-    
-    func sublistScrollToTop() {
+    public func sublistScrollToTop() {
         let itemCount = segmentDataSource?.numberOfItems(container) ?? 0
         for index in 0..<itemCount {
             let itemVC = segmentDataSource?.container(container, contentItemFor: index).itemViewController
@@ -138,13 +123,11 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
     }
     
     private func refreshContentSize(contentVC: ZXSegmentContentViewController) {
-        
-        updateingContentSize = true
-        
         var height = contentVC.view.bounds.height
-        var contentHeight = contentVC.scrollView.contentSize.height + (contentVC.fixedHeight ?? 0)
-        
+        let fixedHeight = contentVC.fixedHeight ?? 0
+        var contentHeight = contentVC.scrollView.contentSize.height + fixedHeight
         var mode = sublistMode
+        
         if let vcMode = contentVC.mode {
             mode = vcMode
         }
@@ -169,8 +152,6 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
         default:
             height = contentHeight
         }
-        
-        
         
         refreshContentSize(subListContentSize: CGSize(width: contentVC.scrollView.contentSize.width, height: height))
     }
@@ -198,24 +179,6 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
         }
     }
     
-    open override func responds(to aSelector: Selector!) -> Bool {
-        
-        let respond = super.responds(to: aSelector)
-        if respond {
-            return true
-        }
-        
-        return segmentDelegate?.responds(to: aSelector) ?? false
-    }
-    
-    open override class func resolveInstanceMethod(_ sel: Selector!) -> Bool {
-        return true
-    }
-    
-    open override func forwardingTarget(for aSelector: Selector!) -> Any? {
-        return segmentDelegate
-    }
-    
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if otherGestureRecognizer == currentContentVC?.scrollView.panGestureRecognizer {
             return true
@@ -238,6 +201,24 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
         }
     }
     
+    open override var contentOffset: CGPoint {
+        didSet {
+            let headerHeight = headerView.bounds.height
+            let sublistOffsetY = contentOffset.y - headerHeight
+            let tracking = currentContentVC?.scrollView.isTracking ?? false
+            let decelerating = currentContentVC?.scrollView.isDecelerating ?? false
+            
+            if sublistOffsetY >= 0 {
+                if !tracking, !decelerating {
+                    currentContentVC?.scrollView.contentOffset.y = sublistOffsetY
+                }
+                barTopConstraint?.update(offset: sublistOffsetY)
+            } else {
+                barTopConstraint?.update(offset: 0)
+                sublistScrollToTop()
+            }
+        }
+    }
     
     /// 子视图不满一屏时展示模式
     public var sublistMode: SublistHeightMode = .contentHeight
@@ -260,8 +241,6 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
     public var pageWidth: CGFloat {
         bounds.width
     }
-    
-    private var updateingContentSize: Bool = false
     
     public weak var segmentDelegate: ZXSegmentContainerDelegate?
     
@@ -326,18 +305,24 @@ extension ZXNestSegmentContainer: ZXSegmentContainerDelegate {
         currentContentVC = contentVC
         currentContentVC?.scrollView.showsVerticalScrollIndicator = false
         currentContentVC?.scrollView.yf_didScrollClosure = { [weak self] (scrollView) in
-            guard let strongSelf = self, !strongSelf.updateingContentSize else {
-                self?
-                    .updateingContentSize = false
-                return
-                
-            }
+            guard let strongSelf = self else { return }
             
             let headerHeight = strongSelf.headerView.bounds.height
             let sublistOffsetY = strongSelf.contentOffset.y - headerHeight
 
-            if sublistOffsetY >= 0 {
-                scrollView.contentOffset.y = sublistOffsetY
+            if sublistOffsetY > 0 {
+                let tracking = strongSelf.currentContentVC?.scrollView.isTracking ?? false
+                let decelerating = strongSelf.currentContentVC?.scrollView.isDecelerating ?? false
+                if tracking || decelerating {
+                    if scrollView.contentSize.height - scrollView.bounds.height < scrollView.contentOffset.y {
+                        scrollView.contentOffset.y = sublistOffsetY
+                    } else {
+                        let mainListOffsetY = scrollView.contentOffset.y + headerHeight
+                        strongSelf.contentOffset.y = mainListOffsetY
+                    }
+                } else {
+                    scrollView.contentOffset.y = sublistOffsetY
+                }
             } else {
                 scrollView.contentOffset.y = 0
             }
@@ -348,12 +333,18 @@ extension ZXNestSegmentContainer: ZXSegmentContainerDelegate {
             
             // 父scrollView同步子scrollView ContentSize
             strongSelf.refreshContentSize(contentVC: contentVC)
+            
+            if scrollView.contentOffset.y > 0 {
+                let headerHeight = strongSelf.headerView.bounds.height
+                let mainListOffsetY = scrollView.contentOffset.y + headerHeight
+                strongSelf.contentOffset.y = mainListOffsetY
+            }
         }
         
         sublistContentInsetObserve = contentVC.scrollView.observe(\.contentInset, options: [.old, .new]) { [weak self] (scrollView, change) in
             guard let strongSelf = self, change.oldValue != change.newValue else { return }
             
-            // 父scrollView同步子scrollView ContentSize
+            // 父scrollView同步子scrollView contentInset
             let originalOffset = contentVC.scrollView.contentOffset
             strongSelf.contentInset.bottom = contentVC.scrollView.contentInset.bottom
             strongSelf.refreshContentOffset(subListContentOffset: originalOffset)
@@ -363,9 +354,14 @@ extension ZXNestSegmentContainer: ZXSegmentContainerDelegate {
         contentInset.bottom = contentVC.scrollView.contentInset.bottom
         refreshContentSize(contentVC: contentVC)
         refreshContentOffset(subListContentOffset: originalOffset)
-        
         segmentDelegate?.container(container, didSelectItemAt: index, type: type)
     }
 
-    
+    public func containerDidReload(_ container: ZXSegmentContainer) {
+        segmentDelegate?.containerDidReload(container)
+    }
+
+    public func container(_ container: ZXSegmentContainer, didDeselectItemAt index: Int, type: ZXSegmentContainer.SwitchType) {
+        segmentDelegate?.container(container, didDeselectItemAt: index, type: type)
+    }
 }
