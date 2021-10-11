@@ -258,11 +258,11 @@ extension ZXSegmentBar {
                 case .fix(let size):
                     make.size.equalTo(size)
                 case .relative(let delta, let height):
-                    make.width.equalTo(targetView).offset(-delta)
+                    make.width.equalTo(targetView.bounds.width-delta)
                     make.height.equalTo(height)
                 }
             }
-            indicatorView.layoutIfNeeded()
+            self.layoutIfNeeded()
         }
         
         if animated {
@@ -281,7 +281,31 @@ extension ZXSegmentBar {
     
     internal func updateIndicatorPosition(_ distance: CGFloat, _ scrollWidth: CGFloat) {
         
-        let change = distance / scrollWidth * 50
+        guard distance != 0 else {
+            return
+        }
+        
+        let currentFrame = itemCache[currentIndex].view.frame
+        
+        let indicatorDistance: CGFloat
+        
+        if distance > 0 {
+            if currentIndex + 1 < itemCache.count {
+                let nextFrame = itemCache[currentIndex + 1].view.frame
+                indicatorDistance = nextFrame.midX - currentFrame.midX
+            } else {
+                indicatorDistance = currentFrame.width
+            }
+        } else {
+            if currentIndex - 1 >= 0 {
+                let nextFrame = itemCache[currentIndex - 1].view.frame
+                indicatorDistance = currentFrame.midX - nextFrame.midX
+            } else {
+                indicatorDistance = currentFrame.width
+            }
+        }
+        
+        let change = distance / scrollWidth * indicatorDistance
         indicatorCenterXConstraint?.update(offset: change)
     }
 }
@@ -299,7 +323,7 @@ extension ZXSegmentBar {
             itemCache.append(item)
             stackView.addArrangedSubview(item.view)
         }
-        
+        stackView.layoutIfNeeded()
     }
     
 }

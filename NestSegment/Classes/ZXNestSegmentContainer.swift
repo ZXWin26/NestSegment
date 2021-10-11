@@ -25,6 +25,7 @@ private var kDidScrollClosureKey = 0
     @objc var scrollView: UIScrollView { get }
 }
 
+/// 嵌套Tab视图
 @objc public protocol ZXSegmentContentViewController: ZXScrollViewController {
     /// UIViewController为非纯列表视图时，固定高度部分使用fixedHeight
     @objc optional var fixedHeight: CGFloat {get}
@@ -85,9 +86,7 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
     }
     
     public func reload() {
-        
         container.reload()
-        
     }
     
     /// 主动刷新contentSize，当前子视图非ZXSegmentContentViewController时，不处理
@@ -273,7 +272,6 @@ open class ZXNestSegmentContainer: ZXSegmentScrollView, UIGestureRecognizerDeleg
         let v = ZXSegmentContainer()
         v.delegate = self
         v.topBar.bottomLineHeight = 0.5
-        v.topBar.bottomLineView.backgroundColor = UIColor.red
         return v
     }()
     
